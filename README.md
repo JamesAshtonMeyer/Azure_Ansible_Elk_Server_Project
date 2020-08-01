@@ -1,2 +1,159 @@
 # Azure_Ansible_Elk_Server_Project
 This Repository contains information on how to create an Elk Stack Server on the Microsoft Azure Platform. This is also the first Project Completed in my Vanderbilt-Cybersecurity Bootcamp
+
+## Automated ELK Stack Deployment
+
+The files in this repository were used to configure the network depicted below.
+
+![TODO: Update the path with the name of your diagram](Images/diagram_filename.png)
+
+These files have been tested and used to generate a live ELK deployment on Azure. They can be used to either recreate the entire deployment pictured above. Alternatively, select portions of the Ansible file may be used to install only certain pieces of it, such as Filebeat.
+
+|                        Filebeat Installation YAMEL Script                                             |
+| ----------------------------------------------------------------------------------------------------- |
+
+---
+- name: installing and launching filebeat
+  hosts: elk
+  become: yes
+  tasks:
+
+  - name: download filebeat deb
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.1-amd64.deb
+
+  - name: install filebeat deb
+    command: dpkg -i filebeat-7.6.1-amd64.deb
+
+  - name: drop in filebeat.yml
+    copy:
+      src: /etc/ansible/files/filebeat-config.yml
+      dest: /etc/filebeat/filebeat.yml
+
+  - name: enable and configure system module
+    command: filebeat modules enable system
+
+  - name: setup filebeat
+    command: filebeat setup
+
+  - name: start filebeat service
+    command: service filebeat start
+
+|                             End of Script                                                               |
+| ------------------------------------------------------------------------------------------------------- |
+
+This document contains the following details:
+- Description of the Topology
+- Access Policies
+- ELK Configuration
+  - Beats in Use
+  - Machines Being Monitored
+- How to Use the Ansible Build
+
+
+### Description of the Topology
+
+The main purpose of this network is to expose a load-balanced and monitored instance of DVWA. Which stands for Damn Vulnerable Web Application.
+
+Load balancing ensures that the network will be highly accessible, in addition to restricting traffic to the network.
+
+Integrating an ELK server allows users to easily monitor the vulnerable VMs for changes to the Application and System Logs.
+
+| Filebeat   | Filebeat monitors the log files or locations that you specify, collects log events, and forwards them either to Elasticsearch or Logstash for indexing.
+| Metricbeat | - Metricbeat takes the metrics and statistics that it collects and ships them to the output that you specify, such as Elasticsearch or Logstash.
+
+The configuration details of each machine may be found below.
+_Note: Use the [Markdown Table Generator](http://www.tablesgenerator.com/markdown_tables) to add/remove values from the table_.
+
+| Name       | Function | IP Address | Operating System |
+|------------|----------|------------|------------------|
+| Jump Box   | Gateway  | 10.1.0.4   | Linux            |
+| Web-1      | VM       | 10.1.0.5   | Linux            |
+| Web-2      | VM       | 10.1.0.6   | Linux            |
+| Elk.Server | Server   | 10.0.0.5   | Linux            |
+
+### Access Policies
+
+The machines on the internal network are not exposed to the public Internet.
+
+Only the Jumpbox machine can accept connections from the Internet. Access to this machine is only allowed from the following IP addresses:
+
+| Whitelisted IPs |
+| 73.58.17.236    |
+
+Machines within the network can only be accessed by .
+
+| Machines | External IP Address | Internal IP Address |
+| Jump box | 52.149.7.221        | 10.1.0.4            |
+
+A summary of the access policies in place can be found in the table below.
+
+| Name       | Publicly Accessible | Allowed IP Addresses |
+|------------|---------------------|--------------------- |
+| Jump Box   | Yes                 |  73.58.17.236        |
+| Web-1      | No                  |  10.1.0.5            |
+| Web-2      | No                  |  10.1.0.6            |
+| Elk.Server | No                  |  10.0.0.5            |
+
+### Elk Configuration
+
+Ansible was used to automate configuration of the ELK machine. No configuration was performed manually, which is advantageous because...
+Rather than creating multiple containers on each VM,
+
+The main benefit of configurating machines with ansible is the time saved by having the ability to configure all machines from
+one machine. As opposed to having to update each machine individually.
+
+The playbook implements the following tasks:
+
+|                                     Steps of Installing the ELK machine                                 |
+| ------------------------------------------------------------------------------------------------------- |
+|                                                                                                         |
+   1] (Optional) Creating a New Virtual Network (Optional depending on Subscription Tier) - You will need
+      to create a new virtual network  on a different region if you currently have the free trial option  
+      due to limitations
+      on CPU allowance.
+   2] Creating A New Virtual Machine - Create a new Ubuntu VM with the follow configurations.
+      A) RAM: More than 4 GiB of memory
+      B) IP Address: The VM must have a public IP Address
+      C) Networking: The VM must be added to region in which you have the ability to add it. If you have
+      a paid subscription then you can make it within your existing virtual network and Security Group.
+      If it is a free subscription make sure you select your new vNEt and allow a new basic Security
+      Group to be created for this VM.
+      D) Access: The VM must use the same SSH keys as your WebVM's. This should be the ssh keys that
+      were created on the Ansible container that's running your jumpbox.
+    3] Downloading and  Configuring the Ansible Container
+      A) From your Ansible container, add the new VM to Ansible's hosts file
+      B) Create a playbook that installs Docker and configures the Container
+      C) Run the playbook to the launch the container
+
+| -------------------------------------------------------------------------------------------------------- |      
+
+
+The following screenshot displays the result of running `docker ps` after successfully configuring the ELK instance.
+
+![TODO: Update the path with the name of your screenshot of docker ps output](Images/docker_ps_output.png)
+
+### Target Machines & Beats
+This ELK server is configured to monitor the following machines:
+- Web
+
+We have installed the following Beats on these machines:
+
+| Name       | VM Installed On | IP Addresses  |
+|------------|-----------------|---------------|
+| Filebeat   | Elk.Server      | 10.0.0.5      |
+| Metricbeat | Elk.Server      | 10.0.0.5      |
+
+These Beats allow us to collect the following information from each machine:
+
+| Filebeat   | Filebeat collects log events, and forwards them either to Elasticsearch or Logstash for indexing.
+| Metricbeat | Metricbeat collects the metrics and statistics that it collects and ships them to the output that you specify, such as Elasticsearch or Logstash.
+
+### Using the Playbook
+In order to use the playbook, you will need to have an Ansible control node already configured. Assuming you have such a control node provisioned:
+
+SSH into the control node and follow the steps below:
+- Copy the file-beat-playbook.yml file to the ~/etc/ansible/roles/ directory.
+- Update the host file to include the elk server's internal IP address
+- Run the playbook, and navigate to Kibana to check that the installation worked as expected.
+
+_As a **Bonus**, provide the specific commands the user will need to run to download the playbook, update the files, etc._
